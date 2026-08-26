@@ -1747,23 +1747,27 @@ function getSimilarBooks(b) {
   const BLOCK = ['엔트리', '스크래치'];
   const isBlock = b.tools.some(t => BLOCK.includes(t));
   const sharedTool = (bk) => bk.tools.some(t => b.tools.includes(t));
-  const sharedGrade = (bk) => bk.grades.some(g => b.grades.includes(g));
 
   let primary = [], secondary = [];
 
   if (b.category === '수험서') {
-    // 같은 카테고리 + 같은 도구 우선
+    const isITQDIAT = b.title.includes('ITQ') || b.title.includes('DIAT');
+    if (isITQDIAT) {
+      // ITQ/DIAT: OA교재·특강교재 중 같은 도구 우선
+      primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category !== '수험서' && sharedTool(bk));
+      secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === '수험서' && sharedTool(bk));
+    } else {
+      // CDT/ADT 등: 같은 카테고리 + 같은 도구 우선
+      primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk));
+      secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !sharedTool(bk));
+    }
+  } else if (b.category === 'OA교재') {
+    // 같은 도구 우선, 부족하면 다른 도구
     primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk));
     secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !sharedTool(bk));
-
-  } else if (b.category === 'OA교재') {
-    // 같은 카테고리 + 같은 도구 + 다른 학년 우선
-    primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk) && !sharedGrade(bk));
-    secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk) &&  sharedGrade(bk));
-
   } else if (b.category === 'SW/특강교재') {
     if (isBlock) {
-      // 엔트리/스크래치: 같은 블록코딩 도구 교재 우선
+      // 엔트리/스크래치: 같은 블록 도구 우선
       primary   = BOOKS.filter(bk => bk.title !== b.title && bk.tools.some(t => BLOCK.includes(t) && b.tools.includes(t)));
       secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !primary.some(p => p.title === bk.title));
     } else {
