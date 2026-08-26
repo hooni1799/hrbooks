@@ -639,6 +639,97 @@ a { text-decoration: none; color: inherit; }
   }
   .header-inner { gap: 8px; }
 }
+
+/* ── 교재 상세 모달 ── */
+#bookDetailOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+#bookDetailOverlay.open { display: flex; }
+.book-detail-modal {
+  background: var(--c-surface);
+  border-radius: 16px;
+  width: min(860px, 95vw);
+  max-height: 88vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,.2);
+}
+.book-detail-body {
+  overflow-y: auto; flex: 1; padding: 24px;
+  display: flex; flex-direction: column; gap: 28px;
+}
+.bd-main {
+  display: flex; gap: 24px;
+}
+.bd-cover-wrap {
+  flex-shrink: 0; width: 180px;
+}
+.bd-cover-wrap img {
+  width: 100%; border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  display: block;
+}
+.bd-cover-placeholder {
+  width: 180px; height: 240px;
+  background: var(--c-bg);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; color: var(--c-muted);
+}
+.bd-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.bd-title { font-size: 20px; font-weight: 700; color: var(--c-text); margin: 4px 0; line-height: 1.3; }
+.bd-rows { display: flex; flex-direction: column; gap: 6px; }
+.bd-row { display: flex; gap: 10px; font-size: 13px; align-items: baseline; }
+.bd-label { color: var(--c-muted); font-weight: 600; white-space: nowrap; min-width: 70px; }
+.bd-val { color: var(--c-text); }
+.bd-feat-wrap { border-top: 1px solid var(--c-border); padding-top: 12px; }
+.bd-feat-label { font-size: 12px; font-weight: 700; color: var(--c-muted); margin-bottom: 6px; }
+.bd-feat { font-size: 13px; color: var(--c-text); line-height: 1.6; }
+.bd-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.bd-compare-btn {
+  padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--c-primary); background: #fff; color: var(--c-primary);
+  transition: background .15s, color .15s;
+}
+.bd-compare-btn:hover { background: var(--c-primary); color: #fff; }
+.bd-compare-btn.bd-in-compare { background: var(--c-primary); color: #fff; }
+.bd-link-btn {
+  padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  background: var(--c-primary); color: #fff; text-decoration: none;
+  display: inline-flex; align-items: center;
+  transition: background .15s;
+}
+.bd-link-btn:hover { background: var(--c-primary-dark); }
+/* 유사 교재 */
+.bd-similar-section { border-top: 1px solid var(--c-border); padding-top: 20px; }
+.bd-similar-title { font-size: 15px; font-weight: 700; color: var(--c-text); margin-bottom: 14px; }
+.bd-similar-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.bd-similar-card {
+  display: flex; flex-direction: column; gap: 10px; padding: 12px;
+  border: 1.5px solid var(--c-border); border-radius: 10px;
+  cursor: pointer; background: var(--c-surface);
+  transition: border-color .15s, box-shadow .15s;
+}
+.bd-similar-card:hover { border-color: var(--c-primary); box-shadow: 0 2px 12px rgba(40,85,197,.1); }
+.bd-sim-cover img { width: 100%; border-radius: 6px; display: block; }
+.bd-sim-placeholder {
+  height: 100px; background: var(--c-bg); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: var(--c-muted);
+}
+.bd-sim-title { font-size: 13px; font-weight: 600; color: var(--c-text); margin: 4px 0 2px; line-height: 1.3; }
+.bd-sim-meta { font-size: 11px; color: var(--c-muted); }
+.bd-similar-empty { color: var(--c-muted); font-size: 13px; }
+/* 모바일 */
+@media (max-width: 600px) {
+  .bd-main { flex-direction: column; }
+  .bd-cover-wrap { width: 140px; }
+  .book-detail-modal { border-radius: 14px 14px 0 0; max-height: 92vh; }
+  #bookDetailOverlay { align-items: flex-end; }
+}
+/* 카드 hover 커서 */
+.book-card { cursor: pointer; }
 </style>
 <!-- Header -->
 <header class="header">
@@ -729,24 +820,20 @@ a { text-decoration: none; color: inherit; }
 
 <!-- Step 1: category -->
       <div class="quiz-step active" id="qStep1">
-        <div class="quiz-q">어떤 종류의 교재가 필요하신가요?</div>
-        <div class="quiz-sub">가르치려는 과목을 선택해 주세요</div>
+        <div class="quiz-q">어떤 목표로 수업하시나요?</div>
+        <div class="quiz-sub">수업 목표에 맞는 교재를 추천해 드릴게요</div>
         <div class="quiz-options">
           <button class="quiz-opt" onclick="quizSelect('cat','수험서')">
-            <div class="quiz-opt-title">🏆 수험서</div>
-            <div class="quiz-opt-desc">ITQ · DIAT · CDT · ADT 등 자격증 시험 준비</div>
+            <div class="quiz-opt-title">🏆 자격증 취득 준비</div>
+            <div class="quiz-opt-desc">ITQ · DIAT · CDT · ADT 등 자격증 시험 대비</div>
           </button>
           <button class="quiz-opt" onclick="quizSelect('cat','OA교재')">
-            <div class="quiz-opt-title">💻 OA교재</div>
-            <div class="quiz-opt-desc">한글 · 파워포인트 · 엑셀 등 오피스 기초 실습</div>
+            <div class="quiz-opt-title">💻 컴퓨터 기초 & 실용</div>
+            <div class="quiz-opt-desc">한글 · 파워포인트 · 엑셀 등 오피스 프로그램 활용</div>
           </button>
           <button class="quiz-opt" onclick="quizSelect('cat','SW/특강교재')">
-            <div class="quiz-opt-title">🎨 SW/특강교재</div>
-            <div class="quiz-opt-desc">코딩 · AI · 디자인 · 영상 · 메타버스 등 창의 교육</div>
-          </button>
-          <button class="quiz-opt" onclick="quizSelect('cat','')">
-            <div class="quiz-opt-title">📚 상관없음</div>
-            <div class="quiz-opt-desc">카테고리 구분 없이 전체 탐색</div>
+            <div class="quiz-opt-title">🎨 코딩 · AI · SW 창의 교육</div>
+            <div class="quiz-opt-desc">엔트리 · 스크래치 · 마인크래프트 · AI · 메타버스</div>
           </button>
         </div>
       </div>
@@ -900,6 +987,39 @@ a { text-decoration: none; color: inherit; }
           <tbody id="purchaseTbody"></tbody>
         </table>
         <div id="purchaseEmpty" class="purchase-empty" style="display:none">검색 결과가 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 교재 상세 Overlay -->
+<div id="bookDetailOverlay">
+  <div class="modal book-detail-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="bdModalTitle">교재 상세</div>
+      <button class="modal-close" onclick="closeBookDetail()">&#x2715;</button>
+    </div>
+    <div class="book-detail-body">
+      <div class="bd-main">
+        <div class="bd-cover-wrap" id="bdCover"></div>
+        <div class="bd-info">
+          <div id="bdCatBadge"></div>
+          <h2 class="bd-title" id="bdTitle"></h2>
+          <div class="bd-rows" id="bdRows"></div>
+          <div class="bd-feat-wrap">
+            <div class="bd-feat-label">교재 특징</div>
+            <div class="bd-feat" id="bdFeatures"></div>
+          </div>
+          <div class="bd-actions">
+            <button class="bd-compare-btn" id="bdCompareBtn" onclick="toggleCompareFromDetail()">+ 비교에 추가</button>
+            <a class="bd-link-btn" id="bdLink" href="#" target="_blank">교재 보기 →</a>
+          </div>
+        </div>
+      </div>
+      <div class="bd-similar-section">
+        <div class="bd-similar-title">이런 교재도 있어요</div>
+        <div class="bd-similar-list" id="bdSimilarList"></div>
       </div>
     </div>
   </div>
@@ -1092,10 +1212,10 @@ function render() {
       ? `<img src="${imgSrc}" alt="${b.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         + placeholderHtml(b)
       : placeholderHtml(b);
-    return `<div class="book-card${isSelected ? ' selected' : ''}" onclick="toggleCompare(${i})">
+    return `<div class="book-card${isSelected ? ' selected' : ''}" data-title="${b.title}" onclick="openBookDetail(this.dataset.title)">
       <div class="book-cover">
         ${coverHtml}
-        <div class="compare-checkbox">${isSelected ? '✓' : '+'}</div>
+        <div class="compare-checkbox" onclick="event.stopPropagation();toggleCompareByTitle(this.closest('.book-card').dataset.title)">${isSelected ? '✓' : '+'}</div>
       </div>
       <div class="book-info">
         ${catBadge(b.category)}
@@ -1116,8 +1236,8 @@ function render() {
   grid.querySelectorAll('.book-card').forEach((el, i) => {
     el._bookData = books[i];
     el.onclick = (e) => {
-      if (e.target.closest('.book-link')) return;
-      toggleCompare(books[i]);
+      if (e.target.closest('.book-link') || e.target.closest('.compare-checkbox')) return;
+      openBookDetail(books[i].title);
     };
   });
 }
@@ -1521,6 +1641,145 @@ function renderPurchaseList(list, kw) {
 document.getElementById('purchaseOverlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closePurchase();
 });
+
+
+/* ── 교재 상세 모달 ── */
+let bdCurrentTitle = '';
+
+function openBookDetail(title) {
+  bdCurrentTitle = title;
+  const b = BOOKS.find(bk => bk.title === title);
+  if (!b) return;
+
+  // 커버
+  const imgSrc = b.imgLocal || b.imgUrl || '';
+  document.getElementById('bdCover').innerHTML = imgSrc
+    ? '<img src="' + imgSrc + '" alt="' + b.title + '" onerror="this.style.display=\'none\'">'
+    : '<div class="bd-cover-placeholder">' + b.title.charAt(0) + '</div>';
+
+  // 뱃지 + 제목
+  document.getElementById('bdCatBadge').innerHTML = catBadge(b.category);
+  document.getElementById('bdTitle').textContent = b.title;
+
+  // 정보 행
+  const gradeVal = GRADE_DISPLAY[b.title] || b.grades.join(', ');
+  const REAL_SERIES = ['자바따','꿀꺽코딩','컴선생 여우님','OA마스터','또롱또롱','컴속마불','CDT','ADT'];
+  const seriesVal = (b.series && REAL_SERIES.includes(b.series)) ? b.series : '-';
+  document.getElementById('bdRows').innerHTML =
+    '<div class="bd-row"><span class="bd-label">대상 학년</span><span class="bd-val">' + gradeVal + '</span></div>' +
+    '<div class="bd-row"><span class="bd-label">활용 도구</span><span class="bd-val">' + b.tools.join(', ') + '</span></div>' +
+    '<div class="bd-row"><span class="bd-label">시리즈</span><span class="bd-val">' + seriesVal + '</span></div>' +
+    '<div class="bd-row"><span class="bd-label">정가</span><span class="bd-val">' + (b.price ? b.price + '원' : '-') + '</span></div>' +
+    '<div class="bd-row"><span class="bd-label">출간</span><span class="bd-val">' + (b.pubDate || '-') + '</span></div>';
+
+  // 교재 특징
+  document.getElementById('bdFeatures').textContent = (b.features || getBookFeature(b) || '-');
+
+  // 비교 버튼 상태
+  const inCmp = compareList.some(c => c.title === title);
+  const btn = document.getElementById('bdCompareBtn');
+  btn.textContent = inCmp ? '✓ 비교 중' : '+ 비교에 추가';
+  btn.classList.toggle('bd-in-compare', inCmp);
+
+  // 교재 보기 링크
+  const linkEl = document.getElementById('bdLink');
+  if (b.purchaseUrl) { linkEl.href = b.purchaseUrl; linkEl.style.display = ''; }
+  else { linkEl.style.display = 'none'; }
+
+  // 유사 교재 (같은 카테고리 + 학년 겹침)
+  const similar = getSimilarBooks(b);
+
+  const simEl = document.getElementById('bdSimilarList');
+  if (!similar.length) {
+    simEl.innerHTML = '<div class="bd-similar-empty">비슷한 교재가 없습니다.</div>';
+  } else {
+    simEl.innerHTML = similar.map(function(s) {
+      const sImg = s.imgLocal || s.imgUrl || '';
+      const sGrade = GRADE_DISPLAY[s.title] || s.grades.join(', ');
+      const safeTitle = s.title.replace(/\\/g,'\\\\').replace(/'/g,'&#39;');
+      return '<div class="bd-similar-card" onclick="openBookDetail(\'' + safeTitle + '\')">' +
+        '<div class="bd-sim-cover">' + (sImg ? '<img src="' + sImg + '" alt="">' : '<div class="bd-sim-placeholder">' + s.title.charAt(0) + '</div>') + '</div>' +
+        '<div class="bd-sim-info">' + catBadge(s.category) +
+        '<div class="bd-sim-title">' + s.title + '</div>' +
+        '<div class="bd-sim-meta">' + sGrade + '</div></div></div>';
+    }).join('');
+  }
+
+  document.getElementById('bookDetailOverlay').classList.add('open');
+}
+
+function closeBookDetail() {
+  document.getElementById('bookDetailOverlay').classList.remove('open');
+}
+
+function toggleCompareFromDetail() {
+  toggleCompareByTitle(bdCurrentTitle);
+}
+
+function toggleCompareByTitle(title) {
+  const b = BOOKS.find(bk => bk.title === title);
+  if (!b) return;
+  const idx = compareList.findIndex(c => c.title === title);
+  if (idx > -1) {
+    compareList.splice(idx, 1);
+  } else {
+    if (compareList.length >= 3) { alert('최대 3권까지 비교할 수 있습니다.'); return; }
+    compareList.push(b);
+  }
+  updateCompareBar();
+  render();
+  // 상세 모달이 열려있으면 버튼 상태 갱신
+  if (document.getElementById('bookDetailOverlay').classList.contains('open') && bdCurrentTitle === title) {
+    const inCmp = compareList.some(c => c.title === title);
+    const btn = document.getElementById('bdCompareBtn');
+    btn.textContent = inCmp ? '✓ 비교 중' : '+ 비교에 추가';
+    btn.classList.toggle('bd-in-compare', inCmp);
+  }
+}
+
+document.getElementById('bookDetailOverlay').addEventListener('click', function(e) {
+  if (e.target === e.currentTarget) closeBookDetail();
+});
+
+
+function getSimilarBooks(b) {
+  const MAX = 4;
+  const BLOCK = ['엔트리', '스크래치'];
+  const isBlock = b.tools.some(t => BLOCK.includes(t));
+  const sharedTool = (bk) => bk.tools.some(t => b.tools.includes(t));
+  const sharedGrade = (bk) => bk.grades.some(g => b.grades.includes(g));
+
+  let primary = [], secondary = [];
+
+  if (b.category === '수험서') {
+    // 같은 카테고리 + 같은 도구 우선
+    primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk));
+    secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !sharedTool(bk));
+
+  } else if (b.category === 'OA교재') {
+    // 같은 카테고리 + 같은 도구 + 다른 학년 우선
+    primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk) && !sharedGrade(bk));
+    secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && sharedTool(bk) &&  sharedGrade(bk));
+
+  } else if (b.category === 'SW/특강교재') {
+    if (isBlock) {
+      // 엔트리/스크래치: 같은 블록코딩 도구 교재 우선
+      primary   = BOOKS.filter(bk => bk.title !== b.title && bk.tools.some(t => BLOCK.includes(t) && b.tools.includes(t)));
+      secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !primary.some(p => p.title === bk.title));
+    } else {
+      // 특강 교재: 같은 카테고리 + 다른 도구 우선
+      primary   = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category && !sharedTool(bk));
+      secondary = BOOKS.filter(bk => bk.title !== b.title && bk.category === b.category &&  sharedTool(bk));
+    }
+  }
+
+  const result = [...primary];
+  for (const bk of secondary) {
+    if (result.length >= MAX) break;
+    if (!result.some(r => r.title === bk.title)) result.push(bk);
+  }
+  return result.slice(0, MAX);
+}
 
 /* ── Init ── */
 render();
