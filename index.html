@@ -554,6 +554,19 @@ a { text-decoration: none; color: inherit; }
   transition: border-color .2s;
 }
 .purchase-search:focus { border-color: var(--c-primary); }
+.region-btns {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.region-btn {
+  padding: 5px 13px; border-radius: 20px;
+  border: 1.5px solid var(--c-border);
+  background: var(--c-bg); color: var(--c-text-muted);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  font-family: inherit;
+}
+.region-btn:hover { border-color: var(--c-primary); color: var(--c-primary); background: rgba(40,85,197,.07); }
+.region-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
 .purchase-table-wrap { overflow-x: auto; }
 .purchase-table {
   width: 100%; border-collapse: collapse;
@@ -972,7 +985,22 @@ a { text-decoration: none; color: inherit; }
     <div class="purchase-body">
       <p class="purchase-intro">해람북스 교재는 아래 지역 총판을 통해 구입하실 수 있습니다. 아래에서 지역을 검색하면 가까운 총판을 찾을 수 있습니다.</p>
       <div class="purchase-search-wrap">
-        <input class="purchase-search" id="purchaseSearchInput" type="text" placeholder="지역을 입력하세요 (예: 서울, 부산, 경기북부…)" oninput="filterPurchase(this.value)" />
+        <input class="purchase-search" id="purchaseSearchInput" type="text" placeholder="지역을 입력하세요 (예: 서울, 부산, 경기북부…)" oninput="onPurchaseInput(this.value)" />
+        <div class="region-btns" id="regionBtns">
+          <button class="region-btn" onclick="selectRegion(this,'서울')">서울</button>
+          <button class="region-btn" onclick="selectRegion(this,'경기')">경기</button>
+          <button class="region-btn" onclick="selectRegion(this,'인천')">인천</button>
+          <button class="region-btn" onclick="selectRegion(this,'강원')">강원</button>
+          <button class="region-btn" onclick="selectRegion(this,'충청')">충청</button>
+          <button class="region-btn" onclick="selectRegion(this,'전북')">전북</button>
+          <button class="region-btn" onclick="selectRegion(this,'광주')">광주</button>
+          <button class="region-btn" onclick="selectRegion(this,'경북')">경북</button>
+          <button class="region-btn" onclick="selectRegion(this,'경남')">경남</button>
+          <button class="region-btn" onclick="selectRegion(this,'대구')">대구</button>
+          <button class="region-btn" onclick="selectRegion(this,'울산')">울산</button>
+          <button class="region-btn" onclick="selectRegion(this,'부산')">부산</button>
+          <button class="region-btn" onclick="selectRegion(this,'제주')">제주</button>
+        </div>
       </div>
       <div class="purchase-table-wrap">
         <table class="purchase-table">
@@ -1608,6 +1636,23 @@ function openPurchase() {
 }
 function closePurchase() {
   document.getElementById('purchaseOverlay').classList.remove('open');
+}
+function onPurchaseInput(val) {
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
+  filterPurchase(val);
+}
+function selectRegion(el, region) {
+  const input = document.getElementById('purchaseSearchInput');
+  const isActive = el.classList.contains('active');
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
+  if (isActive) {
+    input.value = '';
+    filterPurchase('');
+  } else {
+    el.classList.add('active');
+    input.value = region;
+    filterPurchase(region);
+  }
 }
 function filterPurchase(q) {
   const kw = q.trim().toLowerCase();
