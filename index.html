@@ -993,7 +993,7 @@ a { text-decoration: none; color: inherit; }
 
       <!-- Step 3a-code: 코딩 유형 -->
       <div class="quiz-step" id="qStep3a-code">
-        <div class="quiz-q">어떤 유형의 코딩 수업인가요?</div>
+        <div class="quiz-q">어떤 종류의 수업인가요?</div>
         <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
         <div class="quiz-options">
           <button class="quiz-opt" onclick="quizSelectResult('code_type','블록코딩')">
@@ -1002,7 +1002,7 @@ a { text-decoration: none; color: inherit; }
           </button>
           <button class="quiz-opt" onclick="quizSelectResult('code_type','피지컬')">
             <div class="quiz-opt-title">🔧 피지컬 교구</div>
-            <div class="quiz-opt-desc">알고두 · 레고 · 센서보드</div>
+            <div class="quiz-opt-desc">펀보드</div>
           </button>
           <button class="quiz-opt" onclick="quizSelectResult('code_type','AI메타')">
             <div class="quiz-opt-title">🌐 생성형AI · 메타버스</div>
@@ -1636,7 +1636,7 @@ function getNewQuizFilter() {
       if (!a.code_type) return true;
       if (a.code_type === '블록코딩') return b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
       if (a.code_type === '피지컬') return b.tools.some(t => PHYSICAL.includes(t)) || b.title.includes('레고') || b.title.includes('앱 메이킹');
-      if (a.code_type === 'AI메타') return b.tools.some(t => AI_META.includes(t)) || b.title.includes('마인크래프트') || b.tools.includes('RPG Maker');
+      if (a.code_type === 'AI메타') return b.tools.some(t => AI_META.includes(t)) || b.title.includes('마인크래프트') || b.tools.includes('RPG Maker') || b.title.includes('AI 디지털');
       return true;
     };
   }
@@ -1770,6 +1770,7 @@ function applyQuizFilters() {
   syncChips();
   closeQuiz();
   render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 
