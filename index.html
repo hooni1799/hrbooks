@@ -1,4 +1,4 @@
-﻿<meta charset="UTF-8">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>해람북스 교재 추천</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -781,6 +781,56 @@ a { text-decoration: none; color: inherit; }
   pointer-events: auto;
 }
 #scrollTopBtn:hover { background: #1a56db; }
+/* ── Theme toggle ── */
+.btn-theme {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-theme:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Favorites ── */
+.fav-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(4px);
+  color: #bbb;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, background 0.2s, transform 0.15s;
+  z-index: 5;
+  border: none;
+}
+.fav-btn:hover { color: #E8480A; transform: scale(1.15); }
+.fav-btn.fav-active { color: #E8480A; }
+[data-theme="dark"] .fav-btn,
+:root:not([data-theme="light"]) .fav-btn { background: rgba(23,32,53,0.85); }
+.btn-fav-view {
+  background: none; color: var(--c-text-muted);
+  font-size: 13px; padding: 4px 10px;
+  border-radius: 6px; border: 1.5px solid var(--c-border);
+  display: flex; align-items: center; gap: 4px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.btn-fav-view:hover { color: #E8480A; border-color: #E8480A; }
+.btn-fav-view.active { color: #E8480A; border-color: #E8480A; background: rgba(232,72,10,0.07); }
+#favCount {
+  background: #E8480A; color: #fff;
+  font-size: 11px; font-weight: 700;
+  min-width: 17px; height: 17px;
+  border-radius: 9px; padding: 0 4px;
+  display: none; align-items: center; justify-content: center;
+}
+#favCount.has-fav { display: inline-flex; }
+.stats-actions { display: flex; align-items: center; gap: 8px; }
 /* ── Book detail back button ── */
 .modal-back {
   background: none;
@@ -810,6 +860,7 @@ a { text-decoration: none; color: inherit; }
       </span>
       <input type="text" id="searchInput" class="search-input" placeholder="교재명, 시리즈, 도구 검색...">
     </div>
+    <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="다크 모드로 전환">🌙</button>
     <button class="btn-quiz" onclick="openQuiz()">맞춤 추천 받기 ✦</button>
     <button class="btn-purchase" onclick="openPurchase()">교재 구매 안내</button>
   </div>
@@ -857,6 +908,10 @@ a { text-decoration: none; color: inherit; }
       <button class="chip" data-filter="series" data-val="딜라이텍스">딜라이텍스</button>
       <button class="chip" data-filter="series" data-val="마인크래프트">마인크래프트</button>
       <button class="chip" data-filter="series" data-val="꿀꺽코딩">꿀꺽코딩</button>
+      <button class="chip" data-filter="series" data-val="컴선생 여우님">컴선생 여우님</button>
+      <button class="chip" data-filter="series" data-val="또롱또롱">또롱또롱</button>
+      <button class="chip" data-filter="series" data-val="컴속마불">컴속마불</button>
+      <button class="chip" data-filter="series" data-val="OA마스터">OA마스터</button>
     </div>
     <div class="filter-row">
       <span class="filter-label">정렬</span>
@@ -872,7 +927,10 @@ a { text-decoration: none; color: inherit; }
 <!-- Stats -->
 <div class="stats-bar">
   <div class="stats-count"><strong id="countNum">0</strong>개 교재 <span id="quizFilterBadge" style="display:none;background:var(--primary);color:#fff;font-size:11px;font-weight:600;border-radius:20px;padding:2px 10px;margin-left:6px;cursor:pointer" onclick="clearQuizFilter()" title="클릭하여 해제">퀴즈 추천 ✕</span></div>
+  <div class="stats-actions">
+  <button class="btn-fav-view" id="favViewBtn" onclick="toggleFavView()">♡ 즐겨찾기 <span id="favCount"></span></button>
   <button class="btn-reset" onclick="resetFilters()">필터 초기화</button>
+</div>
 </div>
 
 <!-- Grid -->
@@ -1384,6 +1442,7 @@ function catBadge(c) {
 /* ── Filter & render ── */
 function filterBooks() {
   return BOOKS.filter(b => {
+    if (showFavOnly && !favorites.has(b.title)) return false;
     if (filters.cat && b.category !== filters.cat) return false;
     if (filters.grade && !b.grades.includes(filters.grade)) return false;
     if (filters.tool) {
@@ -1402,6 +1461,14 @@ function filterBooks() {
         if (!b.tools.includes('마인크래프트') && !b.title.includes('마인크래프트')) return false;
       } else if (filters.series === '꿀꺽코딩') {
         if (b.series !== '꿀꺽코딩') return false;
+      } else if (filters.series === '컴선생 여우님') {
+        if (b.series !== '컴선생 여우님') return false;
+      } else if (filters.series === '또롱또롱') {
+        if (b.series !== '또롱또롱') return false;
+      } else if (filters.series === '컴속마불') {
+        if (b.series !== '컴속마불') return false;
+      } else if (filters.series === 'OA마스터') {
+        if (b.series !== 'OA마스터') return false;
       }
     }
     if (quizActiveFilter && !quizActiveFilter(b)) return false;
@@ -1448,6 +1515,8 @@ function render() {
       <div class="book-cover">
         ${coverHtml}
         <div class="compare-checkbox" onclick="event.stopPropagation();toggleCompareByTitle(this.closest('.book-card').dataset.title)">${isSelected ? '✓' : '+'}</div>
+      </div>
+        <button class="${favorites.has(b.title) ? 'fav-btn fav-active' : 'fav-btn'}" onclick="event.stopPropagation();toggleFav(this.closest('.book-card').dataset.title)" title="즐겨찾기">${favorites.has(b.title) ? '♥' : '♡'}</button>
       </div>
       <div class="book-info">
         ${catBadge(b.category)}
@@ -1924,8 +1993,11 @@ function resetFilters() {
   filters = { cat: '', grade: '', tool: '', series: '', sort: '' };
   searchQ = '';
   quizActiveFilter = null;
+  showFavOnly = false;
   document.getElementById('searchInput').value = '';
   document.getElementById('quizFilterBadge').style.display = 'none';
+  const fb = document.getElementById('favViewBtn');
+  if (fb) fb.classList.remove('active');
   syncChips();
   render();
 }
@@ -2041,6 +2113,9 @@ document.getElementById('purchaseOverlay').addEventListener('click', e => {
 let bdCurrentTitle = '';
 let bdHistory = [];
 let quizActiveFilter = null;
+let favorites = new Set(JSON.parse(localStorage.getItem('hb_favorites') || '[]'));
+let showFavOnly = false;
+let currentTheme = localStorage.getItem('hb_theme') || 'system';
 
 function openBookDetail(title) {
   const overlay = document.getElementById('bookDetailOverlay');
@@ -2195,7 +2270,56 @@ function getSimilarBooks(b) {
 function fmtGrade(g){return g.replace('초1~2','1~2학년').replace('초3~4','3~4학년').replace('초5~6','5~6학년');}
 function fmtGrades(b){if(GRADE_DISPLAY[b.title])return[GRADE_DISPLAY[b.title]];if(b.grades.includes('초3~4')&&b.grades.includes('초5~6'))return['3~6학년'];return b.grades.map(fmtGrade);}
 /* ── Init ── */
+applyTheme(currentTheme);
 render();
+updateFavCount();
+
+function toggleFav(title) {
+  if (favorites.has(title)) { favorites.delete(title); } else { favorites.add(title); }
+  localStorage.setItem('hb_favorites', JSON.stringify([...favorites]));
+  updateFavCount();
+  render();
+}
+function updateFavCount() {
+  const badge = document.getElementById('favCount');
+  if (!badge) return;
+  if (favorites.size > 0) {
+    badge.textContent = favorites.size;
+    badge.classList.add('has-fav');
+  } else {
+    badge.textContent = '';
+    badge.classList.remove('has-fav');
+  }
+  const btn = document.getElementById('favViewBtn');
+  if (btn) {
+    const icon = showFavOnly ? '\u2665' : '\u2661';
+    btn.innerHTML = icon + ' \uc990\uacA8\ucc3e\uae30 ' + (favorites.size > 0 ? '<span id="favCount" class="has-fav">' + favorites.size + '</span>' : '<span id="favCount"></span>');
+  }
+}
+function toggleFavView() {
+  showFavOnly = !showFavOnly;
+  const btn = document.getElementById('favViewBtn');
+  if (btn) btn.classList.toggle('active', showFavOnly);
+  updateFavCount();
+  render();
+}
+function applyTheme(t) {
+  currentTheme = t;
+  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('hb_theme', t);
+  updateThemeBtn();
+}
+function updateThemeBtn() {
+  const btn = document.getElementById('themeToggleBtn');
+  if (!btn) return;
+  btn.textContent = currentTheme === 'dark' ? '\u2600' : '\ud83c\udf19';
+  btn.title = currentTheme === 'dark' ? '\ub77c\uc774\ud2b8 \ubaa8\ub4dc\ub85c \uc804\ud658' : '\ub2e4\ud06c \ubaa8\ub4dc\ub85c \uc804\ud658';
+}
+function toggleTheme() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
 
 /* ── Scroll to top ── */
 (function() {
