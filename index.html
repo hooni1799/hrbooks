@@ -484,6 +484,14 @@ a { text-decoration: none; color: inherit; }
 .qrb-meta { font-size: 11px; color: var(--c-text-muted); }
 .quiz-result-footer { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; }
 .quiz-result-footer .btn-primary, .quiz-result-footer .btn-secondary { flex: 1; }
+.quiz-options-3 { grid-template-columns: 1fr 1fr 1fr; }
+.quiz-opt-wide { grid-column: span 2; }
+.quiz-dot.active { background: var(--c-primary); opacity: 0.45; }
+.quiz-result-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; justify-content: center; }
+.quiz-result-tag { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--c-surface); border: 1.5px solid var(--c-primary); color: var(--c-primary); }
+.qrb-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.qrb-tag { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; background: var(--c-bg); color: var(--c-text-muted); border: 1px solid var(--c-border); }
+.qrb-more { text-align: center; font-size: 12px; color: var(--c-text-muted); padding: 8px 0; }
 
 /* ── Compare rows (새 디자인) ──────────────── */
 .compare-row {
@@ -826,154 +834,229 @@ a { text-decoration: none; color: inherit; }
   <div class="modal quiz-modal">
     <div class="modal-header">
       <div class="modal-title">맞춤 교재 추천</div>
-      <button class="modal-close" onclick="closeQuiz()">✕</button>
+      <button class="modal-close" onclick="closeQuiz()">&#x2715;</button>
     </div>
     <div class="quiz-body">
       <div class="quiz-progress" id="quizProgress"></div>
 
-<!-- Step 1: category -->
+      <!-- Step 1: 학년 선택 -->
       <div class="quiz-step active" id="qStep1">
-        <div class="quiz-q">어떤 목표로 수업하시나요?</div>
-        <div class="quiz-sub">수업 목표에 맞는 교재를 추천해 드릴게요</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="quizSelect('cat','수험서')">
-            <div class="quiz-opt-title">🏆 자격증 취득 준비</div>
-            <div class="quiz-opt-desc">ITQ · DIAT · CDT · ADT 등 자격증 시험 대비</div>
+        <div class="quiz-q">가르칠 학생의 학년은 어떻게 되나요?</div>
+        <div class="quiz-sub">학년 수준에 맞는 교재를 안내해 드릴게요</div>
+        <div class="quiz-options quiz-options-3">
+          <button class="quiz-opt" onclick="quizSelect('grade','초1~2')">
+            <div class="quiz-opt-title">🌱 저학년</div>
+            <div class="quiz-opt-desc">초등 1~2학년</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('cat','OA교재')">
-            <div class="quiz-opt-title">💻 컴퓨터 기초 & 실용</div>
-            <div class="quiz-opt-desc">한글 · 파워포인트 · 엑셀 등 오피스 프로그램 활용</div>
+          <button class="quiz-opt" onclick="quizSelect('grade','초3~4')">
+            <div class="quiz-opt-title">🌿 중학년</div>
+            <div class="quiz-opt-desc">초등 3~4학년</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('cat','SW/특강교재')">
-            <div class="quiz-opt-title">🎨 코딩 · AI · SW 창의 교육</div>
-            <div class="quiz-opt-desc">엔트리 · 스크래치 · 마인크래프트 · AI · 메타버스</div>
+          <button class="quiz-opt" onclick="quizSelect('grade','초5~6')">
+            <div class="quiz-opt-title">🌳 고학년</div>
+            <div class="quiz-opt-desc">초등 5~6학년</div>
           </button>
         </div>
       </div>
 
-      <!-- Step 2exam: 수험서 -->
-      <div class="quiz-step" id="qStep2exam">
+      <!-- Step 2: 수업 목적 -->
+      <div class="quiz-step" id="qStep2">
+        <div class="quiz-q">어떤 목적으로 수업하시나요?</div>
+        <div class="quiz-sub">수업 목적에 맞는 교재를 추천해 드릴게요</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="quizSelect('purpose','cert')">
+            <div class="quiz-opt-title">🏆 자격증 준비</div>
+            <div class="quiz-opt-desc">ITQ · DIAT · CDT · ADT</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('purpose','oa')">
+            <div class="quiz-opt-title">💻 OA 컴퓨터 활용</div>
+            <div class="quiz-opt-desc">한글 · 파워포인트 · 엑셀</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('purpose','code')">
+            <div class="quiz-opt-title">🤖 코딩 · AI · SW</div>
+            <div class="quiz-opt-desc">블록코딩 · 피지컬 · AI</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('purpose','design')">
+            <div class="quiz-opt-title">🎨 디자인 · 크리에이터</div>
+            <div class="quiz-opt-desc">캔바 · 웹툰 · 영상편집</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3a-cert: 자격증 시험 종류 -->
+      <div class="quiz-step" id="qStep3a-cert">
         <div class="quiz-q">어떤 자격증 시험을 준비하시나요?</div>
         <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
         <div class="quiz-options">
-          <button class="quiz-opt" onclick="quizSelect('subcat','EXAM_ITQ')">
+          <button class="quiz-opt" onclick="quizSelect('cert_type','ITQ')">
             <div class="quiz-opt-title">📋 ITQ</div>
-            <div class="quiz-opt-desc">파워포인트 · 엑셀 · 한글 · 인터넷</div>
+            <div class="quiz-opt-desc">한글 · 파워포인트 · 엑셀 · 인터넷</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','EXAM_DIAT')">
+          <button class="quiz-opt" onclick="quizSelect('cert_type','DIAT')">
             <div class="quiz-opt-title">📝 DIAT</div>
-            <div class="quiz-opt-desc">워드프로세서 · 멀티미디어 · 인터넷</div>
+            <div class="quiz-opt-desc">워드프로세서 · 프리젠테이션 · 스프레드시트</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','EXAM_CDT')">
-            <div class="quiz-opt-title">💻 CDT · ADT</div>
-            <div class="quiz-opt-desc">코딩 창의 개발 능력 · 앱 창의 개발 능력</div>
+          <button class="quiz-opt" onclick="quizSelect('cert_type','CDT')">
+            <div class="quiz-opt-title">💡 CDT · ADT</div>
+            <div class="quiz-opt-desc">코딩창의개발능력 · 앱창의개발능력</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','')">
+          <button class="quiz-opt" onclick="quizSelect('cert_type','')">
             <div class="quiz-opt-title">📚 상관없음</div>
             <div class="quiz-opt-desc">모든 수험서 보기</div>
           </button>
         </div>
       </div>
 
-      <!-- Step 2oa: OA 프로그램 -->
-      <div class="quiz-step" id="qStep2oa">
-        <div class="quiz-q">어떤 프로그램을 중심으로 가르치실 건가요?</div>
+      <!-- Step 3b-cert: 과목 선택 -->
+      <div class="quiz-step" id="qStep3b-cert">
+        <div class="quiz-q">어떤 과목인가요?</div>
         <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
         <div class="quiz-options">
-          <button class="quiz-opt" onclick="quizSelect('subcat','OA_한글')">
+          <button class="quiz-opt" onclick="quizSelectResult('cert_tool','한글')">
             <div class="quiz-opt-title">📝 한글</div>
-            <div class="quiz-opt-desc">한글 2022 기반 문서 작성 실습</div>
+            <div class="quiz-opt-desc">한글 2022</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','OA_파워포인트')">
+          <button class="quiz-opt" onclick="quizSelectResult('cert_tool','파워포인트')">
             <div class="quiz-opt-title">📊 파워포인트</div>
-            <div class="quiz-opt-desc">파워포인트 2021 기반 프레젠테이션 실습</div>
+            <div class="quiz-opt-desc">파워포인트 2021</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','OA_엑셀')">
+          <button class="quiz-opt" onclick="quizSelectResult('cert_tool','엑셀')">
             <div class="quiz-opt-title">📈 엑셀</div>
-            <div class="quiz-opt-desc">엑셀 2021 기반 스프레드시트 실습</div>
+            <div class="quiz-opt-desc">엑셀 2021</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','')">
-            <div class="quiz-opt-title">🖥️ 상관없음</div>
-            <div class="quiz-opt-desc">모든 OA 교재 보기</div>
+          <button class="quiz-opt" onclick="quizSelectResult('cert_tool','기타')">
+            <div class="quiz-opt-title">🌐 기타</div>
+            <div class="quiz-opt-desc">인터넷 · 멀티미디어 등</div>
+          </button>
+          <button class="quiz-opt quiz-opt-wide" onclick="quizSelectResult('cert_tool','')">
+            <div class="quiz-opt-title">📚 상관없음</div>
+            <div class="quiz-opt-desc">과목 무관</div>
           </button>
         </div>
       </div>
 
-      <!-- Step 2sw: SW 유형 -->
-      <div class="quiz-step" id="qStep2sw">
-        <div class="quiz-q">어떤 유형의 창의 교육을 하고 싶으신가요?</div>
+      <!-- Step 3a-oa: OA 프로그램 -->
+      <div class="quiz-step" id="qStep3a-oa">
+        <div class="quiz-q">어떤 프로그램을 가르치실 건가요?</div>
         <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
-        <div class="quiz-options quiz-options-6">
-          <button class="quiz-opt" onclick="quizSelect('subcat','SW_블록코딩')">
-            <div class="quiz-opt-title">🤖 블록 코딩</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','한글')">
+            <div class="quiz-opt-title">📝 한글</div>
+            <div class="quiz-opt-desc">한글 2022</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','파워포인트')">
+            <div class="quiz-opt-title">📊 파워포인트</div>
+            <div class="quiz-opt-desc">파워포인트 2021</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','엑셀')">
+            <div class="quiz-opt-title">📈 엑셀</div>
+            <div class="quiz-opt-desc">엑셀 2021</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','윈도우')">
+            <div class="quiz-opt-title">🖥️ 윈도우 · 인터넷</div>
+            <div class="quiz-opt-desc">윈도우 11 · 인터넷</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','기타')">
+            <div class="quiz-opt-title">🎨 기타</div>
+            <div class="quiz-opt-desc">이미지 편집 등</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelect('oa_tool','')">
+            <div class="quiz-opt-title">📚 상관없음</div>
+            <div class="quiz-opt-desc">모든 OA 교재</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3b-oa: 수준 선택 -->
+      <div class="quiz-step" id="qStep3b-oa">
+        <div class="quiz-q">어떤 수준을 원하시나요?</div>
+        <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="quizSelectResult('oa_level','입문')">
+            <div class="quiz-opt-title">🌱 입문</div>
+            <div class="quiz-opt-desc">기초부터 차근차근</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelectResult('oa_level','기본')">
+            <div class="quiz-opt-title">📗 기본</div>
+            <div class="quiz-opt-desc">핵심 기능 위주</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelectResult('oa_level','심화')">
+            <div class="quiz-opt-title">🌳 심화</div>
+            <div class="quiz-opt-desc">실전 · 자격증 대비</div>
+          </button>
+          <button class="quiz-opt" onclick="quizSelectResult('oa_level','')">
+            <div class="quiz-opt-title">📚 상관없음</div>
+            <div class="quiz-opt-desc">수준 무관</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3a-code: 코딩 유형 -->
+      <div class="quiz-step" id="qStep3a-code">
+        <div class="quiz-q">어떤 유형의 코딩 수업인가요?</div>
+        <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="quizSelectResult('code_type','블록코딩')">
+            <div class="quiz-opt-title">🧩 블록 코딩</div>
             <div class="quiz-opt-desc">엔트리 · 스크래치</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','SW_마인크래프트')">
-            <div class="quiz-opt-title">🎮 마인크래프트</div>
-            <div class="quiz-opt-desc">건축 · 코딩 · 메이커</div>
+          <button class="quiz-opt" onclick="quizSelectResult('code_type','피지컬')">
+            <div class="quiz-opt-title">🔧 피지컬 교구</div>
+            <div class="quiz-opt-desc">알고두 · 레고 · 센서보드</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','SW_AI디자인')">
-            <div class="quiz-opt-title">🎨 AI · 디자인 · 영상</div>
-            <div class="quiz-opt-desc">캔바 · 곰픽 · 망고툰 · 메디방 등</div>
+          <button class="quiz-opt" onclick="quizSelectResult('code_type','AI메타')">
+            <div class="quiz-opt-title">🌐 생성형AI · 메타버스</div>
+            <div class="quiz-opt-desc">AI · 마인크래프트 · VR · AR</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','SW_VR3D')">
-            <div class="quiz-opt-title">🌐 VR · AR · 3D</div>
-            <div class="quiz-opt-desc">딜라이텍스 · 매지카복셀</div>
-          </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','SW_앱인벤터')">
-            <div class="quiz-opt-title">📱 앱 만들기</div>
-            <div class="quiz-opt-desc">앱인벤터 기반 앱 개발</div>
-          </button>
-          <button class="quiz-opt" onclick="quizSelect('subcat','')">
+          <button class="quiz-opt" onclick="quizSelectResult('code_type','')">
             <div class="quiz-opt-title">📚 상관없음</div>
-            <div class="quiz-opt-desc">모든 SW/특강 교재 보기</div>
+            <div class="quiz-opt-desc">모든 코딩 교재</div>
           </button>
         </div>
       </div>
 
-      <!-- Step 3grade -->
-      <div class="quiz-step" id="qStep3grade">
-        <div class="quiz-q">가르칠 학생의 학년은 어떻게 되나요?</div>
-        <div class="quiz-sub">주요 대상 학년을 선택해 주세요</div>
+      <!-- Step 3a-design: 디자인 분야 -->
+      <div class="quiz-step" id="qStep3a-design">
+        <div class="quiz-q">어떤 분야에 관심 있으신가요?</div>
+        <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
         <div class="quiz-options">
-          <button class="quiz-opt" onclick="quizSelect('grade','초1~2')">
-            <div class="quiz-opt-title">🌱 초1~2학년</div>
-            <div class="quiz-opt-desc">처음 배우는 기초 단계</div>
+          <button class="quiz-opt" onclick="quizSelectResult('design_type','디자인')">
+            <div class="quiz-opt-title">✏️ 디자인</div>
+            <div class="quiz-opt-desc">미리캔버스 · AI 디자인</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('grade','초3~4')">
-            <div class="quiz-opt-title">🌿 초3~4학년</div>
-            <div class="quiz-opt-desc">기초~중급 단계</div>
+          <button class="quiz-opt" onclick="quizSelectResult('design_type','영상')">
+            <div class="quiz-opt-title">🎬 이미지 · 영상편집</div>
+            <div class="quiz-opt-desc">곰픽 · 곰믹스</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('grade','초5~6')">
-            <div class="quiz-opt-title">🌳 초5~6학년</div>
-            <div class="quiz-opt-desc">중급~심화 단계</div>
+          <button class="quiz-opt" onclick="quizSelectResult('design_type','웹툰')">
+            <div class="quiz-opt-title">🖌️ 웹툰 · 일러스트</div>
+            <div class="quiz-opt-desc">망고툰 · 메디방 · 오픈툰즈</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelect('grade','')">
-            <div class="quiz-opt-title">📚 학년 무관</div>
-            <div class="quiz-opt-desc">학년 구분 없이 탐색</div>
+          <button class="quiz-opt" onclick="quizSelectResult('design_type','')">
+            <div class="quiz-opt-title">📚 상관없음</div>
+            <div class="quiz-opt-desc">모든 디자인 교재</div>
           </button>
         </div>
       </div>
 
-      <!-- Step Result -->
+      <!-- Result -->
       <div class="quiz-step" id="qStepResult">
         <div class="quiz-result-header" id="quizResultHeader"></div>
+        <div class="quiz-result-tags" id="quizResultTags"></div>
         <div class="quiz-result-list" id="quizResultList"></div>
         <div class="quiz-result-footer">
-          <button class="btn-secondary" onclick="openQuiz()">처음으로</button>
+          <button class="btn-secondary" onclick="openQuiz()">다시 추천받기</button>
           <button class="btn-primary" id="quizApplyBtn" onclick="applyQuizFilters()">필터 적용 후 보기</button>
         </div>
       </div>
 
     </div>
     <div class="quiz-footer">
-      <button class="btn-secondary" id="quizBackBtn" onclick="quizBack()" style="visibility:hidden">← 이전</button>
+      <button class="btn-secondary" id="quizBackBtn" onclick="quizBack()" style="visibility:hidden">&#8592; 이전</button>
       <div></div>
     </div>
   </div>
 </div>
-
-
 
 <!-- 교재 구매 안내 Overlay -->
 <div id="purchaseOverlay">
@@ -1454,6 +1537,11 @@ function closeQuiz() {
   document.getElementById('quizOverlay').classList.remove('open');
 }
 
+function getQuizTotalSteps() {
+  const p = quizAnswers.purpose;
+  return (p === 'cert' || p === 'oa') ? 4 : 3;
+}
+
 function showQuizStep(step) {
   document.querySelectorAll('.quiz-step').forEach(el => el.classList.remove('active'));
   const el = document.getElementById('qStep' + step);
@@ -1462,100 +1550,228 @@ function showQuizStep(step) {
   const back = document.getElementById('quizBackBtn');
   back.style.visibility = step !== '1' ? 'visible' : 'hidden';
   const prog = document.getElementById('quizProgress');
-  const stepNums = {'1':1,'2exam':2,'2oa':2,'2sw':2,'3grade':3,'Result':4};
-  const cur = stepNums[step] || 1;
-  const total = quizAnswers.cat ? 4 : 3;
-  prog.innerHTML = Array.from({length: total}, (_,i) =>
-    `<div class="quiz-dot${i < cur ? ' done' : i === cur-1 ? ' active' : ''}"></div>`
-  ).join('');
+  const total = getQuizTotalSteps();
+  const posMap = {'1':1,'2':2,'3a-cert':3,'3a-oa':3,'3a-code':3,'3a-design':3,'3b-cert':4,'3b-oa':4};
+  const cur = posMap[step] !== undefined ? posMap[step] : (total + 1);
+  prog.innerHTML = Array.from({length: total}, (_, i) => {
+    const pos = i + 1;
+    const cls = pos < cur ? ' done' : pos === cur ? ' active' : '';
+    return '<div class="quiz-dot' + cls + '"></div>';
+  }).join('');
 }
 
 function quizSelect(key, val) {
   quizAnswers[key] = val;
-  if (key === 'cat') {
-    if (val === '수험서') showQuizStep('2exam');
-    else if (val === 'OA교재') showQuizStep('2oa');
-    else if (val === 'SW/특강교재') showQuizStep('2sw');
-    else { quizAnswers.subcat = ''; showQuizStep('3grade'); }
-  } else if (key === 'subcat') {
-    showQuizStep('3grade');
-  } else if (key === 'grade') {
-    showQuizResult();
+  if (key === 'grade') {
+    showQuizStep('2');
+  } else if (key === 'purpose') {
+    if (val === 'cert') showQuizStep('3a-cert');
+    else if (val === 'oa') showQuizStep('3a-oa');
+    else if (val === 'code') showQuizStep('3a-code');
+    else showQuizStep('3a-design');
+  } else if (key === 'cert_type') {
+    showQuizStep('3b-cert');
+  } else if (key === 'oa_tool') {
+    showQuizStep('3b-oa');
   }
+}
+
+function quizSelectResult(key, val) {
+  quizAnswers[key] = val;
+  showQuizResult();
 }
 
 function quizBack() {
   const step = quizStep;
-  if (step === '2exam' || step === '2oa' || step === '2sw') { showQuizStep('1'); }
-  else if (step === '3grade') {
-    const cat = quizAnswers.cat;
-    if (cat === '수험서') showQuizStep('2exam');
-    else if (cat === 'OA교재') showQuizStep('2oa');
-    else if (cat === 'SW/특강교재') showQuizStep('2sw');
-    else showQuizStep('1');
-  } else if (step === 'Result') { showQuizStep('3grade'); }
-  else { showQuizStep('1'); }
+  if (step === '2') showQuizStep('1');
+  else if (step.startsWith('3a-')) showQuizStep('2');
+  else if (step === '3b-cert') showQuizStep('3a-cert');
+  else if (step === '3b-oa') showQuizStep('3a-oa');
+  else if (step === 'Result') {
+    const p = quizAnswers.purpose;
+    if (p === 'cert') showQuizStep('3b-cert');
+    else if (p === 'oa') showQuizStep('3b-oa');
+    else if (p === 'code') showQuizStep('3a-code');
+    else showQuizStep('3a-design');
+  }
 }
 
-function getQuizFilterFn() {
-  const cat = quizAnswers.cat || '';
-  const subcat = quizAnswers.subcat || '';
-  const grade = quizAnswers.grade || '';
-  const gradeOk = b => !grade || b.grades.includes(grade);
-  const catOk = b => !cat || b.category === cat;
-  const SW_AI = ['캔바','캡컷','곰픽','곰믹스','망고툰','메디방','오픈툰즈','피봇','피봇 애니메이터','별별 디자인 플래닛','미리캔버스','펑크랜드 스튜디오'];
-  const SW_VR = ['딜라이텍스','매지카복셀','헬로메이플'];
-  if (subcat==='EXAM_ITQ') return b=>b.category==='수험서'&&b.title.includes('ITQ')&&gradeOk(b);
-  if (subcat==='EXAM_DIAT') return b=>b.category==='수험서'&&b.title.includes('DIAT')&&gradeOk(b);
-  if (subcat==='EXAM_CDT') return b=>b.category==='수험서'&&(b.title.includes('CDT')||b.title.includes('ADT'))&&gradeOk(b);
-  if (subcat==='OA_한글') return b=>b.category==='OA교재'&&b.tools.includes('한글')&&gradeOk(b);
-  if (subcat==='OA_파워포인트') return b=>b.category==='OA교재'&&b.tools.includes('파워포인트')&&gradeOk(b);
-  if (subcat==='OA_엑셀') return b=>b.category==='OA교재'&&b.tools.includes('엑셀')&&gradeOk(b);
-  if (subcat==='SW_블록코딩') return b=>b.category==='SW/특강교재'&&(b.tools.includes('엔트리')||b.tools.includes('스크래치'))&&gradeOk(b);
-  if (subcat==='SW_마인크래프트') return b=>b.category==='SW/특강교재'&&b.tools.includes('마인크래프트')&&gradeOk(b);
-  if (subcat==='SW_AI디자인') return b=>b.category==='SW/특강교재'&&b.tools.some(t=>SW_AI.includes(t))&&gradeOk(b);
-  if (subcat==='SW_VR3D') return b=>b.category==='SW/특강교재'&&b.tools.some(t=>SW_VR.includes(t))&&gradeOk(b);
-  if (subcat==='SW_앱인벤터') return b=>b.category==='SW/특강교재'&&b.tools.includes('앱인벤터')&&gradeOk(b);
-  return b=>catOk(b)&&gradeOk(b);
+function getNewQuizFilter() {
+  const a = quizAnswers;
+  const gradeOk = b => !a.grade || b.grades.includes(a.grade);
+  if (a.purpose === 'cert') {
+    return b => {
+      if (b.category !== '수험서' || !gradeOk(b)) return false;
+      if (a.cert_type === 'ITQ' && !b.title.includes('ITQ')) return false;
+      if (a.cert_type === 'DIAT' && !b.title.includes('DIAT')) return false;
+      if (a.cert_type === 'CDT' && !b.title.includes('CDT') && !b.title.includes('ADT')) return false;
+      if (a.cert_tool === '한글' && !b.tools.includes('한글') && !b.title.includes('한글') && !b.title.includes('워드')) return false;
+      if (a.cert_tool === '파워포인트' && !b.tools.includes('파워포인트') && !b.title.includes('파워') && !b.title.includes('프리젠테이션')) return false;
+      if (a.cert_tool === '엑셀' && !b.tools.includes('엑셀') && !b.title.includes('엑셀') && !b.title.includes('스프레드')) return false;
+      if (a.cert_tool === '기타' && !b.title.includes('인터넷') && !b.title.includes('멀티미디어')) return false;
+      return true;
+    };
+  }
+  if (a.purpose === 'oa') {
+    return b => {
+      if (b.category !== 'OA교재' || !gradeOk(b)) return false;
+      if (a.oa_tool === '한글' && !b.tools.includes('한글')) return false;
+      if (a.oa_tool === '파워포인트' && !b.tools.includes('파워포인트')) return false;
+      if (a.oa_tool === '엑셀' && !b.tools.includes('엑셀')) return false;
+      if (a.oa_tool === '윈도우' && !b.tools.includes('윈도우') && !b.tools.includes('인터넷')) return false;
+      if (a.oa_tool === '기타' && (b.tools.includes('한글') || b.tools.includes('파워포인트') || b.tools.includes('엑셀') || b.tools.includes('윈도우') || b.tools.includes('인터넷'))) return false;
+      if (a.oa_level === '입문' && !b.title.includes('처음') && !b.title.includes('인사하기') && !b.title.includes('친구하기') && !b.title.includes('탐험하기')) return false;
+      if (a.oa_level === '심화' && !b.title.includes('작품만들기') && !b.title.includes('작품 만들기')) return false;
+      return true;
+    };
+  }
+  if (a.purpose === 'code') {
+    const BLOCK = ['엔트리','스크래치'];
+    const PHYSICAL = ['알고두','펀보드','언플러그드 코딩','모션플레이'];
+    const AI_META = ['딜라이텍스','매지카복셀','코스페이시스','메이플스토리 월드'];
+    const DESIGN_SKIP = ['미리캔버스','망고TOON','메디방 페인트','오픈툰즈','피봇 애니메이터'];
+    return b => {
+      if (b.category !== 'SW/특강교재' || !gradeOk(b)) return false;
+      if (b.tools.some(t => DESIGN_SKIP.includes(t))) return false;
+      if (!a.code_type) return true;
+      if (a.code_type === '블록코딩') return b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
+      if (a.code_type === '피지컬') return b.tools.some(t => PHYSICAL.includes(t)) || b.title.includes('레고') || b.title.includes('앱 메이킹');
+      if (a.code_type === 'AI메타') return b.tools.some(t => AI_META.includes(t)) || b.title.includes('마인크래프트') || b.tools.includes('RPG Maker');
+      return true;
+    };
+  }
+  if (a.purpose === 'design') {
+    const VIDEO_T = ['곰픽','곰믹스'];
+    const WEBTOON_T = ['망고TOON','메디방 페인트','오픈툰즈','피봇 애니메이터'];
+    const DESIGN_T = ['미리캔버스'];
+    const allDesign = [...VIDEO_T, ...WEBTOON_T, ...DESIGN_T];
+    return b => {
+      if (!gradeOk(b)) return false;
+      if (b.category !== 'SW/특강교재' && b.category !== 'OA교재') return false;
+      const isDesign = b.tools.some(t => allDesign.includes(t))
+        || b.title.includes('디자인') || b.title.includes('웹툰') || b.title.includes('드로잉')
+        || b.title.includes('곰픽') || b.title.includes('AI 디지털') || b.title.includes('피봇')
+        || (b.category === 'OA교재' && b.title.includes('화가되기'));
+      if (!isDesign) return false;
+      if (!a.design_type) return true;
+      if (a.design_type === '디자인') return b.tools.some(t => DESIGN_T.includes(t)) || b.title.includes('디자인') || b.title.includes('AI 디지털');
+      if (a.design_type === '영상') return b.tools.some(t => VIDEO_T.includes(t)) || b.title.includes('곰픽') || b.title.includes('화가되기');
+      if (a.design_type === '웹툰') return b.tools.some(t => WEBTOON_T.includes(t)) || b.title.includes('웹툰') || b.title.includes('드로잉') || b.title.includes('피봇');
+      return false;
+    };
+  }
+  return b => gradeOk(b);
+}
+
+function getAnswerTags() {
+  const a = quizAnswers;
+  const tags = [];
+  if (a.grade === '초1~2') tags.push('#초등1~2학년');
+  else if (a.grade === '초3~4') tags.push('#초등3~4학년');
+  else if (a.grade === '초5~6') tags.push('#초등5~6학년');
+  if (a.purpose === 'cert') {
+    if (a.cert_type === 'ITQ') tags.push('#ITQ자격증');
+    else if (a.cert_type === 'DIAT') tags.push('#DIAT자격증');
+    else if (a.cert_type === 'CDT') tags.push('#CDT·ADT');
+    else tags.push('#자격증대비');
+    const cm = {'한글':'#한글2022','파워포인트':'#파워포인트2021','엑셀':'#엑셀2021','기타':'#기타과목'};
+    if (a.cert_tool && cm[a.cert_tool]) tags.push(cm[a.cert_tool]);
+  } else if (a.purpose === 'oa') {
+    const tm = {'한글':'#한글2022','파워포인트':'#파워포인트2021','엑셀':'#엑셀2021','윈도우':'#윈도우11·인터넷'};
+    tags.push(a.oa_tool && tm[a.oa_tool] ? tm[a.oa_tool] : '#OA활용');
+    const lm = {'입문':'#입문기초','기본':'#기본실용','심화':'#실전심화'};
+    if (a.oa_level && lm[a.oa_level]) tags.push(lm[a.oa_level]);
+    tags.push('#실습중심');
+  } else if (a.purpose === 'code') {
+    tags.push('#코딩·SW교육');
+    if (a.code_type === '블록코딩') tags.push('#블록코딩');
+    else if (a.code_type === '피지컬') tags.push('#피지컬교구');
+    else if (a.code_type === 'AI메타') tags.push('#생성형AI·메타버스');
+  } else if (a.purpose === 'design') {
+    tags.push('#디자인·크리에이터');
+    if (a.design_type === '디자인') tags.push('#그래픽디자인');
+    else if (a.design_type === '영상') tags.push('#이미지·영상편집');
+    else if (a.design_type === '웹툰') tags.push('#웹툰·일러스트');
+  }
+  return tags;
+}
+
+function getBookTags(b) {
+  const tags = [];
+  const grades = fmtGrades(b);
+  if (grades.length) tags.push('#' + grades[0]);
+  b.tools.slice(0, 2).forEach(t => {
+    if (t === '기타') return;
+    let label = t;
+    if (t === '한글' && b.title.includes('2022')) label = '한글2022';
+    else if (t === '파워포인트' && b.title.includes('2021')) label = '파워포인트2021';
+    else if (t === '엑셀' && b.title.includes('2021')) label = '엑셀2021';
+    tags.push('#' + label);
+  });
+  if (b.category === '수험서') tags.push('#자격증대비');
+  else if (b.category === 'OA교재') tags.push('#실습중심');
+  else if (['엔트리','스크래치'].some(t => b.tools.includes(t))) tags.push('#블록코딩');
+  else if (['딜라이텍스','매지카복셀','코스페이시스'].some(t => b.tools.includes(t))) tags.push('#메타버스·VR');
+  else if (['망고TOON','메디방 페인트','오픈툰즈'].some(t => b.tools.includes(t))) tags.push('#웹툰·일러스트');
+  else if (b.tools.includes('미리캔버스')) tags.push('#디자인');
+  else tags.push('#SW창의교육');
+  return tags.slice(0, 4);
 }
 
 function showQuizResult() {
   showQuizStep('Result');
-  const fn = getQuizFilterFn();
-  const matches = BOOKS.filter(fn);
-  document.getElementById('quizResultHeader').innerHTML = matches.length
-    ? `<div class="quiz-rc">${matches.length}권의 교재를 찾았어요!</div><div class="quiz-rs">아래에서 확인하세요</div>`
-    : `<div class="quiz-rc">조건에 맞는 교재가 없습니다</div><div class="quiz-rs">조건을 변경해 보세요</div>`;
+  const fn = getNewQuizFilter();
+  const all = BOOKS.filter(fn);
+  const matches = all.slice(0, 3);
+  document.getElementById('quizResultHeader').innerHTML = all.length
+    ? '<div class="quiz-rc">' + all.length + '권의 교재를 찾았어요!</div><div class="quiz-rs">딱 맞는 교재를 확인해 보세요</div>'
+    : '<div class="quiz-rc">조건에 맞는 교재가 없습니다</div><div class="quiz-rs">조건을 변경해 보세요</div>';
+  const answerTags = getAnswerTags();
+  document.getElementById('quizResultTags').innerHTML = answerTags.map(t => '<span class="quiz-result-tag">' + t + '</span>').join('');
   document.getElementById('quizResultList').innerHTML = matches.map(b => {
     const grade = fmtGrades(b).join(', ');
-    const tools = b.tools.slice(0,2).join(', ');
-    const catCls = b.category==='수험서'?'cat-exam':b.category==='OA교재'?'cat-oa':'cat-sw';
-    return `<div class="qrb">
-      <img class="qrb-img" src="${b.imgLocal||''}" onerror="this.style.visibility='hidden'" alt="">
-      <div class="qrb-info">
-        <span class="qrb-cat ${catCls}">${b.category}</span>
-        <div class="qrb-title">${b.title}</div>
-        <div class="qrb-meta">${grade} · ${tools}</div>
-      </div></div>`;
-  }).join('');
+    const tools = b.tools.filter(t => t !== '기타').slice(0, 2).join(' · ');
+    const catCls = b.category === '수험서' ? 'cat-exam' : b.category === 'OA교재' ? 'cat-oa' : 'cat-sw';
+    const bookTags = getBookTags(b);
+    return '<div class="qrb">'
+      + '<img class="qrb-img" src="' + (b.imgLocal || '') + '" onerror="this.style.visibility=\'hidden\'" alt="">'
+      + '<div class="qrb-info">'
+      + '<span class="qrb-cat ' + catCls + '">' + b.category + '</span>'
+      + '<div class="qrb-title">' + b.title + '</div>'
+      + '<div class="qrb-meta">' + grade + (tools ? ' · ' + tools : '') + '</div>'
+      + '<div class="qrb-tags">' + bookTags.map(t => '<span class="qrb-tag">' + t + '</span>').join('') + '</div>'
+      + '</div></div>';
+  }).join('') + (all.length > 3 ? '<div class="qrb-more">외 ' + (all.length - 3) + '권 더 있어요 → 필터 적용 후 보기</div>' : '');
 }
 
 function applyQuizFilters() {
-  const cat = quizAnswers.cat || '';
-  const subcat = quizAnswers.subcat || '';
-  const grade = quizAnswers.grade || '';
-  filters.cat = cat;
-  filters.grade = grade;
+  const a = quizAnswers;
+  filters.cat = '';
+  filters.grade = a.grade || '';
   filters.tool = '';
-  const tm = {'OA_한글':'한글','OA_파워포인트':'파워포인트','OA_엑셀':'엑셀','SW_마인크래프트':'마인크래프트','SW_앱인벤터':'앱인벤터'};
-  if (tm[subcat]) filters.tool = tm[subcat];
-  const sm = {'EXAM_ITQ':'ITQ','EXAM_DIAT':'DIAT','EXAM_CDT':'CDT'};
-  if (sm[subcat]) { searchQ = sm[subcat]; document.getElementById('searchInput').value = sm[subcat]; }
-  else { searchQ = ''; document.getElementById('searchInput').value = ''; }
+  searchQ = '';
+  if (a.purpose === 'cert') {
+    filters.cat = '수험서';
+    if (a.cert_type === 'ITQ') searchQ = 'ITQ';
+    else if (a.cert_type === 'DIAT') searchQ = 'DIAT';
+    else if (a.cert_type === 'CDT') searchQ = 'CDT';
+    const tm = {'한글':'한글','파워포인트':'파워포인트','엑셀':'엑셀'};
+    if (a.cert_tool && tm[a.cert_tool]) filters.tool = tm[a.cert_tool];
+  } else if (a.purpose === 'oa') {
+    filters.cat = 'OA교재';
+    const tm = {'한글':'한글','파워포인트':'파워포인트','엑셀':'엑셀','윈도우':'윈도우'};
+    if (a.oa_tool && tm[a.oa_tool]) filters.tool = tm[a.oa_tool];
+  } else if (a.purpose === 'code') {
+    filters.cat = 'SW/특강교재';
+  } else if (a.purpose === 'design') {
+    filters.cat = 'SW/특강교재';
+  }
+  document.getElementById('searchInput').value = searchQ;
   syncChips();
   closeQuiz();
   render();
 }
+
 
 
 /* ── Chip filters ── */
