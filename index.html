@@ -1008,9 +1008,9 @@ a { text-decoration: none; color: inherit; }
             <div class="quiz-opt-title">🌐 AI · 메타버스</div>
             <div class="quiz-opt-desc">AI · 마인크래프트 · VR · AR</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelectResult('code_type','')">
-            <div class="quiz-opt-title">📚 상관없음</div>
-            <div class="quiz-opt-desc">모든 교재</div>
+          <button class="quiz-opt" onclick="quizSelectResult('code_type','기타')">
+            <div class="quiz-opt-title">📚 기타</div>
+            <div class="quiz-opt-desc">웹툰 · 디자인 · 3D모델링 · 기타</div>
           </button>
         </div>
       </div>
@@ -1032,10 +1032,7 @@ a { text-decoration: none; color: inherit; }
             <div class="quiz-opt-title">🥽 VR · AR</div>
             <div class="quiz-opt-desc">딜라이텍스</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelectResult('code_subtype','기타')">
-            <div class="quiz-opt-title">🎮 기타</div>
-            <div class="quiz-opt-desc">3D모델링 · 가상세계 · 게임개발</div>
-          </button>
+
         </div>
       </div>
 
@@ -1656,25 +1653,23 @@ function getNewQuizFilter() {
   }
   if (a.purpose === 'code') {
     const BLOCK = ['엔트리','스크래치'];
-    const PHYSICAL = ['알고두','펀보드','언플러그드 코딩','모션플레이'];
-    const AI_META = ['딜라이텍스','매지카복셀','코스페이시스','메이플스토리 월드'];
-    const DESIGN_SKIP = ['미리캔버스','망고TOON','메디방 페인트','오픈툰즈','피봇 애니메이터'];
+    const PHYSICAL = ['펀보드'];
     return b => {
       if (b.category !== 'SW/특강교재' || !gradeOk(b)) return false;
-      if (b.tools.some(t => DESIGN_SKIP.includes(t))) return false;
       if (!a.code_type) return true;
       if (a.code_type === '블록코딩') return b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
-      if (a.code_type === '피지컬') return b.tools.some(t => PHYSICAL.includes(t)) || b.title.includes('레고') || b.title.includes('앱 메이킹');
+      if (a.code_type === '피지컬') return b.tools.some(t => PHYSICAL.includes(t));
       if (a.code_type === 'AI메타') {
         if (a.code_subtype === 'AI') return b.title.includes('AI 디지털');
         if (a.code_subtype === '마인크래프트') return b.title.includes('마인크래프트');
         if (a.code_subtype === 'VR/AR') return b.tools.includes('딜라이텍스');
-        if (a.code_subtype === '기타') {
-          const aiMetaFull = ['딜라이텍스','매지카복셀','코스페이시스','메이플스토리 월드'];
-          return (b.tools.some(t => aiMetaFull.includes(t)) || b.tools.includes('RPG Maker'))
-            && !b.title.includes('마인크래프트') && !b.title.includes('AI 디지털') && !b.tools.includes('딜라이텍스');
-        }
-        return b.tools.some(t => AI_META.includes(t)) || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
+        return b.tools.includes('딜라이텍스') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
+      }
+      if (a.code_type === '기타') {
+        const isBlock = b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
+        const isPhysical = b.tools.some(t => PHYSICAL.includes(t));
+        const isAiMeta = b.tools.includes('딜라이텍스') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
+        return !isBlock && !isPhysical && !isAiMeta;
       }
       return true;
     };
@@ -1725,7 +1720,8 @@ function getAnswerTags() {
     tags.push('#코딩·SW교육');
     if (a.code_type === '블록코딩') tags.push('#블록코딩');
     else if (a.code_type === '피지컬') tags.push('#피지컬교구');
-    else if (a.code_type === 'AI메타') tags.push('#생성형AI·메타버스');
+    else if (a.code_type === 'AI메타') tags.push('#AI·메타버스');
+    else if (a.code_type === '기타') tags.push('#기타SW교재');
   } else if (a.purpose === 'design') {
     tags.push('#디자인·크리에이터');
     if (a.design_type === '디자인') tags.push('#그래픽디자인');
