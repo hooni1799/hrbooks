@@ -1515,7 +1515,6 @@ function render() {
       <div class="book-cover">
         ${coverHtml}
         <div class="compare-checkbox" onclick="event.stopPropagation();toggleCompareByTitle(this.closest('.book-card').dataset.title)">${isSelected ? '✓' : '+'}</div>
-      </div>
         <button class="${favorites.has(b.title) ? 'fav-btn fav-active' : 'fav-btn'}" onclick="event.stopPropagation();toggleFav(this.closest('.book-card').dataset.title)" title="즐겨찾기">${favorites.has(b.title) ? '♥' : '♡'}</button>
       </div>
       <div class="book-info">
