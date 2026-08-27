@@ -1657,18 +1657,18 @@ function getNewQuizFilter() {
     return b => {
       if (b.category !== 'SW/특강교재' || !gradeOk(b)) return false;
       if (!a.code_type) return true;
-      if (a.code_type === '블록코딩') return b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
+      if (a.code_type === '블록코딩') return b.tools.some(t => BLOCK.includes(t)) || b.tools.includes('언플러그드 코딩') || b.title.includes('언플러그드');
       if (a.code_type === '피지컬') return b.tools.some(t => PHYSICAL.includes(t));
       if (a.code_type === 'AI메타') {
         if (a.code_subtype === 'AI') return b.title.includes('AI 디지털');
-        if (a.code_subtype === '마인크래프트') return b.title.includes('마인크래프트');
+        if (a.code_subtype === '마인크래프트') return b.tools.includes('마인크래프트') || b.title.includes('마인크래프트');
         if (a.code_subtype === 'VR/AR') return b.tools.includes('딜라이텍스');
-        return b.tools.includes('딜라이텍스') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
+        return b.tools.includes('딜라이텍스') || b.tools.includes('마인크래프트') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
       }
       if (a.code_type === '기타') {
-        const isBlock = b.tools.some(t => BLOCK.includes(t)) || b.title.includes('언플러그드');
+        const isBlock = b.tools.some(t => BLOCK.includes(t)) || b.tools.includes('언플러그드 코딩') || b.title.includes('언플러그드');
         const isPhysical = b.tools.some(t => PHYSICAL.includes(t));
-        const isAiMeta = b.tools.includes('딜라이텍스') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
+        const isAiMeta = b.tools.includes('딜라이텍스') || b.tools.includes('마인크래프트') || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
         return !isBlock && !isPhysical && !isAiMeta;
       }
       return true;
