@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<meta charset="UTF-8">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>해람북스 교재 추천</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,16 +59,33 @@ a { text-decoration: none; color: inherit; }
   height: 62px;
 }
 .brand {
-  display: flex; align-items: center; gap: 10px;
-  color: #fff; font-weight: 700; font-size: 17px;
-  white-space: nowrap;
+  display: flex; align-items: center; gap: 11px;
+  white-space: nowrap; background: none; border: none;
+  cursor: pointer; padding: 4px 6px; border-radius: 10px;
+  transition: background 0.18s;
+  text-decoration: none;
 }
+.brand:hover { background: rgba(255,255,255,0.08); }
 .brand-logo {
-  width: 32px; height: 32px;
-  background: var(--c-primary);
-  border-radius: 8px;
+  width: 40px; height: 40px;
+  background: linear-gradient(140deg, #3366e8 0%, #1e45b8 100%);
+  border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 900; color: #fff; letter-spacing: -1px;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(40,85,197,0.45);
+  flex-shrink: 0;
+}
+.brand-text {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+}
+.brand-sub {
+  font-size: 10.5px; font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.6px; line-height: 1;
+}
+.brand-main {
+  font-size: 16px; font-weight: 800;
+  color: #fff; letter-spacing: -0.3px; line-height: 1.1;
 }
 .search-wrap {
   flex: 1; position: relative;
@@ -457,7 +474,7 @@ a { text-decoration: none; color: inherit; }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .brand span { display: none; }
+  .brand-sub, .brand-main { display: none; }
   .btn-quiz { padding: 0 12px; font-size: 13px; }
   .quiz-options { grid-template-columns: 1fr; }
   .compare-slots { flex-wrap: nowrap; overflow-x: auto; }
@@ -850,10 +867,13 @@ a { text-decoration: none; color: inherit; }
 <!-- Header -->
 <header class="header">
   <div class="header-inner">
-    <div class="brand">
-      <div class="brand-logo">H</div>
-      <span>해람북스 교재 추천</span>
-    </div>
+    <button class="brand" onclick="goHome()" title="메인으로">
+      <div class="brand-logo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+      <div class="brand-text">
+        <span class="brand-sub">해람북스</span>
+        <span class="brand-main">교재 추천</span>
+      </div>
+    </button>
     <div class="search-wrap">
       <span class="search-icon">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -2268,6 +2288,10 @@ function getSimilarBooks(b) {
 
 function fmtGrade(g){return g.replace('초1~2','1~2학년').replace('초3~4','3~4학년').replace('초5~6','5~6학년');}
 function fmtGrades(b){if(GRADE_DISPLAY[b.title])return[GRADE_DISPLAY[b.title]];if(b.grades.includes('초3~4')&&b.grades.includes('초5~6'))return['3~6학년'];return b.grades.map(fmtGrade);}
+function goHome() {
+  resetFilters();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 /* ── Init ── */
 applyTheme(currentTheme);
 render();
