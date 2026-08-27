@@ -805,6 +805,22 @@ a { text-decoration: none; color: inherit; }
       <button class="chip" data-filter="tool" data-val="앱인벤터">앱인벤터</button>
       <button class="chip" data-filter="tool" data-val="기타">기타</button>
     </div>
+    <div class="filter-row">
+      <span class="filter-label">시리즈</span>
+      <div class="filter-divider"></div>
+      <button class="chip active" data-filter="series" data-val="">전체</button>
+      <button class="chip" data-filter="series" data-val="딜라이텍스">딜라이텍스</button>
+      <button class="chip" data-filter="series" data-val="마인크래프트">마인크래프트</button>
+      <button class="chip" data-filter="series" data-val="꿀꺽코딩">꿀꺽코딩</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">정렬</span>
+      <div class="filter-divider"></div>
+      <button class="chip active" data-filter="sort" data-val="">기본순</button>
+      <button class="chip" data-filter="sort" data-val="가격순">가격순</button>
+      <button class="chip" data-filter="sort" data-val="출간일순">출간일순</button>
+      <button class="chip" data-filter="sort" data-val="제목순">제목순</button>
+    </div>
   </div>
 </div>
 
@@ -1287,7 +1303,7 @@ BOOKS.forEach(b => { if (TOOL_OVERRIDE[b.title]) b.tools = TOOL_OVERRIDE[b.title
 
 
 /* ── State ── */
-let filters = { cat: '', grade: '', tool: '' };
+let filters = { cat: '', grade: '', tool: '', series: '', sort: '' };
 let searchQ = '';
 let compareList = [];
 let quizStep = 1;
@@ -1331,6 +1347,16 @@ function filterBooks() {
         if (!b.tools.includes(filters.tool)) return false;
       }
     }
+    if (filters.series) {
+      if (filters.series === '딜라이텍스') {
+        if (!b.tools.includes('딜라이텍스') && !b.title.includes('딜라이텍스')) return false;
+      } else if (filters.series === '마인크래프트') {
+        if (b.title.includes('마크 빌리지')) return false;
+        if (!b.tools.includes('마인크래프트') && !b.title.includes('마인크래프트')) return false;
+      } else if (filters.series === '꿀꺽코딩') {
+        if (b.series !== '꿀꺽코딩') return false;
+      }
+    }
     if (searchQ) {
       const q = searchQ.toLowerCase();
       const hay = (b.title + b.series + b.tools.join(' ')).toLowerCase();
@@ -1342,6 +1368,21 @@ function filterBooks() {
 
 function render() {
   const books = filterBooks();
+  if (filters.sort === '가격순') {
+    books.sort((a, b) => { const pa = a.price ? parseInt(a.price.replace(/,/g,'')) : 0; const pb = b.price ? parseInt(b.price.replace(/,/g,'')) : 0; return pb - pa; });
+  } else if (filters.sort === '출간일순') {
+    books.sort((a, b) => { const toNum = d => { if (!d) return 0; const m = d.match(/(\d+)년\s*(\d+)월/); return m ? parseInt(m[1])*12+parseInt(m[2]) : 0; }; return toNum(b.pubDate) - toNum(a.pubDate); });
+  } else if (filters.sort === '제목순') {
+    books.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+  } else {
+    const lvl = t => t.includes('스타터') ? 0 : t.includes('주니어') ? 1 : t.includes('메이커') ? 2 : t.includes('마스터') ? 3 : 99;
+    if (filters.series === '딜라이텍스' || filters.series === '마인크래프트') {
+      books.sort((a, b) => lvl(a.title) - lvl(b.title));
+    } else if (filters.series === '꿀꺽코딩') {
+      const tool = t => t.includes('엔트리') ? 0 : 1;
+      books.sort((a, b) => { const td = tool(a.title) - tool(b.title); return td !== 0 ? td : lvl(a.title) - lvl(b.title); });
+    }
+  }
   document.getElementById('countNum').textContent = books.length;
   const grid = document.getElementById('bookGrid');
   if (books.length === 0) {
@@ -1839,7 +1880,7 @@ document.querySelectorAll('.chip').forEach(chip => {
 });
 
 function syncChips() {
-  ['cat','grade','tool'].forEach(type => {
+  ['cat','grade','tool','series','sort'].forEach(type => {
     document.querySelectorAll(`.chip[data-filter="${type}"]`).forEach(c => {
       c.classList.toggle('active', c.dataset.val === filters[type]);
     });
@@ -1847,7 +1888,7 @@ function syncChips() {
 }
 
 function resetFilters() {
-  filters = { cat: '', grade: '', tool: '' };
+  filters = { cat: '', grade: '', tool: '', series: '', sort: '' };
   searchQ = '';
   document.getElementById('searchInput').value = '';
   syncChips();
