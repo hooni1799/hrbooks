@@ -472,7 +472,7 @@ a { text-decoration: none; color: inherit; }
 .quiz-result-header { text-align: center; margin-bottom: 16px; }
 .quiz-rc { font-size: 18px; font-weight: 800; color: var(--c-primary); margin-bottom: 4px; }
 .quiz-rs { font-size: 13px; color: var(--c-text-muted); }
-.quiz-result-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; margin-bottom: 16px; }
+.quiz-result-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .qrb { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: var(--c-surface); border: 1.5px solid var(--c-border); }
 .qrb-img { width: 38px; height: 50px; object-fit: cover; border-radius: 5px; flex-shrink: 0; background: var(--c-border); }
 .qrb-info { flex: 1; min-width: 0; }
@@ -1018,7 +1018,7 @@ a { text-decoration: none; color: inherit; }
       <!-- Step 3b-code: AI/메타버스 세부 유형 -->
       <div class="quiz-step" id="qStep3b-code">
         <div class="quiz-q">어떤 분야인가요?</div>
-        <div class="quiz-sub">없으면 '상관없음'을 선택하세요</div>
+        <div class="quiz-sub">해당하는 분야를 선택하세요</div>
         <div class="quiz-options">
           <button class="quiz-opt" onclick="quizSelectResult('code_subtype','AI')">
             <div class="quiz-opt-title">🤖 AI</div>
@@ -1030,11 +1030,11 @@ a { text-decoration: none; color: inherit; }
           </button>
           <button class="quiz-opt" onclick="quizSelectResult('code_subtype','VR/AR')">
             <div class="quiz-opt-title">🥽 VR · AR</div>
-            <div class="quiz-opt-desc">딜라이텍스 · 매지카복셀 · 코스페이시스</div>
+            <div class="quiz-opt-desc">딜라이텍스</div>
           </button>
-          <button class="quiz-opt" onclick="quizSelectResult('code_subtype','')">
-            <div class="quiz-opt-title">📚 상관없음</div>
-            <div class="quiz-opt-desc">모든 교재</div>
+          <button class="quiz-opt" onclick="quizSelectResult('code_subtype','기타')">
+            <div class="quiz-opt-title">🎮 기타</div>
+            <div class="quiz-opt-desc">3D모델링 · 가상세계 · 게임개발</div>
           </button>
         </div>
       </div>
@@ -1668,7 +1668,12 @@ function getNewQuizFilter() {
       if (a.code_type === 'AI메타') {
         if (a.code_subtype === 'AI') return b.title.includes('AI 디지털');
         if (a.code_subtype === '마인크래프트') return b.title.includes('마인크래프트');
-        if (a.code_subtype === 'VR/AR') return b.tools.some(t => ['딜라이텍스','매지카복셀','코스페이시스','메이플스토리 월드'].includes(t));
+        if (a.code_subtype === 'VR/AR') return b.tools.includes('딜라이텍스');
+        if (a.code_subtype === '기타') {
+          const aiMetaFull = ['딜라이텍스','매지카복셀','코스페이시스','메이플스토리 월드'];
+          return (b.tools.some(t => aiMetaFull.includes(t)) || b.tools.includes('RPG Maker'))
+            && !b.title.includes('마인크래프트') && !b.title.includes('AI 디지털') && !b.tools.includes('딜라이텍스');
+        }
         return b.tools.some(t => AI_META.includes(t)) || b.title.includes('마인크래프트') || b.title.includes('AI 디지털');
       }
       return true;
@@ -1756,13 +1761,12 @@ function showQuizResult() {
   showQuizStep('Result');
   const fn = getNewQuizFilter();
   const all = BOOKS.filter(fn);
-  const matches = all.slice(0, 3);
   document.getElementById('quizResultHeader').innerHTML = all.length
-    ? '<div class="quiz-rc">' + all.length + '권의 교재를 찾았어요!</div><div class="quiz-rs">딱 맞는 교재를 확인해 보세요</div>'
+    ? '<div class="quiz-rc">' + all.length + '권의 교재를 찾았어요!</div><div class="quiz-rs">스크롤하여 모두 확인하세요</div>'
     : '<div class="quiz-rc">조건에 맞는 교재가 없습니다</div><div class="quiz-rs">조건을 변경해 보세요</div>';
   const answerTags = getAnswerTags();
   document.getElementById('quizResultTags').innerHTML = answerTags.map(t => '<span class="quiz-result-tag">' + t + '</span>').join('');
-  document.getElementById('quizResultList').innerHTML = matches.map(b => {
+  document.getElementById('quizResultList').innerHTML = all.map(b => {
     const grade = fmtGrades(b).join(', ');
     const tools = b.tools.filter(t => t !== '기타').slice(0, 2).join(' · ');
     const catCls = b.category === '수험서' ? 'cat-exam' : b.category === 'OA교재' ? 'cat-oa' : 'cat-sw';
@@ -1775,7 +1779,7 @@ function showQuizResult() {
       + '<div class="qrb-meta">' + grade + (tools ? ' · ' + tools : '') + '</div>'
       + '<div class="qrb-tags">' + bookTags.map(t => '<span class="qrb-tag">' + t + '</span>').join('') + '</div>'
       + '</div></div>';
-  }).join('') + (all.length > 3 ? '<div class="qrb-more">외 ' + (all.length - 3) + '권 더 있어요 → 필터 적용 후 보기</div>' : '');
+  }).join('');
 }
 
 function applyQuizFilters() {
