@@ -751,7 +751,52 @@ a { text-decoration: none; color: inherit; }
 }
 /* 카드 hover 커서 */
 .book-card { cursor: pointer; }
-</style>
+
+/* ── Scroll to top ── */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,.22);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+  z-index: 200;
+}
+#scrollTopBtn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+#scrollTopBtn:hover { background: #1a56db; }
+/* ── Book detail back button ── */
+.modal-back {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 10px 4px 2px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.modal-back:hover { background: rgba(59,130,246,.1); }
+/* ── Quiz apply button ── */
+.quiz-result-footer { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.quiz-apply-btn { min-width: 160px; }</style>
 <!-- Header -->
 <header class="header">
   <div class="header-inner">
@@ -826,7 +871,7 @@ a { text-decoration: none; color: inherit; }
 
 <!-- Stats -->
 <div class="stats-bar">
-  <div class="stats-count"><strong id="countNum">0</strong>개 교재</div>
+  <div class="stats-count"><strong id="countNum">0</strong>개 교재 <span id="quizFilterBadge" style="display:none;background:var(--primary);color:#fff;font-size:11px;font-weight:600;border-radius:20px;padding:2px 10px;margin-left:6px;cursor:pointer" onclick="clearQuizFilter()" title="클릭하여 해제">퀴즈 추천 ✕</span></div>
   <button class="btn-reset" onclick="resetFilters()">필터 초기화</button>
 </div>
 
@@ -1098,6 +1143,7 @@ a { text-decoration: none; color: inherit; }
         <div class="quiz-result-list" id="quizResultList"></div>
         <div class="quiz-result-footer">
           <button class="btn-secondary quiz-restart-btn" onclick="openQuiz()">↩ 다시 추천받기</button>
+          <button class="btn-primary quiz-apply-btn" onclick="applyQuizFilters()">📋 메인 화면에서 보기</button>
         </div>
       </div>
 
@@ -1159,6 +1205,7 @@ a { text-decoration: none; color: inherit; }
 <div id="bookDetailOverlay">
   <div class="modal book-detail-modal">
     <div class="modal-header">
+      <button class="modal-back" id="bdBackBtn" onclick="goBackDetail()" style="display:none">&#8592; 이전</button>
       <div class="modal-title" id="bdModalTitle">교재 상세</div>
       <button class="modal-close" onclick="closeBookDetail()">&#x2715;</button>
     </div>
@@ -1357,6 +1404,7 @@ function filterBooks() {
         if (b.series !== '꿀꺽코딩') return false;
       }
     }
+    if (quizActiveFilter && !quizActiveFilter(b)) return false;
     if (searchQ) {
       const q = searchQ.toLowerCase();
       const hay = (b.title + b.series + b.tools.join(' ')).toLowerCase();
@@ -1837,28 +1885,11 @@ function showQuizResult() {
 }
 
 function applyQuizFilters() {
-  const a = quizAnswers;
-  filters.cat = '';
-  filters.grade = a.grade || '';
-  filters.tool = '';
+  quizActiveFilter = getNewQuizFilter();
+  filters = { cat: '', grade: '', tool: '', series: '', sort: '' };
   searchQ = '';
-  if (a.purpose === 'cert') {
-    filters.cat = '수험서';
-    if (a.cert_type === 'ITQ') searchQ = 'ITQ';
-    else if (a.cert_type === 'DIAT') searchQ = 'DIAT';
-    else if (a.cert_type === 'CDT') searchQ = 'CDT';
-    const tm = {'한글':'한글','파워포인트':'파워포인트','엑셀':'엑셀'};
-    if (a.cert_tool && tm[a.cert_tool]) filters.tool = tm[a.cert_tool];
-  } else if (a.purpose === 'oa') {
-    filters.cat = 'OA교재';
-    const tm = {'한글':'한글','파워포인트':'파워포인트','엑셀':'엑셀','윈도우':'윈도우'};
-    if (a.oa_tool && tm[a.oa_tool]) filters.tool = tm[a.oa_tool];
-  } else if (a.purpose === 'code') {
-    filters.cat = 'SW/특강교재';
-  } else if (a.purpose === 'design') {
-    filters.cat = 'SW/특강교재';
-  }
-  document.getElementById('searchInput').value = searchQ;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('quizFilterBadge').style.display = 'inline';
   syncChips();
   closeQuiz();
   render();
@@ -1873,6 +1904,8 @@ document.querySelectorAll('.chip').forEach(chip => {
     const type = chip.dataset.filter;
     const val = chip.dataset.val;
     filters[type] = val;
+    quizActiveFilter = null;
+    document.getElementById('quizFilterBadge').style.display = 'none';
     document.querySelectorAll(`.chip[data-filter="${type}"]`).forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     render();
@@ -1890,8 +1923,15 @@ function syncChips() {
 function resetFilters() {
   filters = { cat: '', grade: '', tool: '', series: '', sort: '' };
   searchQ = '';
+  quizActiveFilter = null;
   document.getElementById('searchInput').value = '';
+  document.getElementById('quizFilterBadge').style.display = 'none';
   syncChips();
+  render();
+}
+function clearQuizFilter() {
+  quizActiveFilter = null;
+  document.getElementById('quizFilterBadge').style.display = 'none';
   render();
 }
 
@@ -1999,9 +2039,16 @@ document.getElementById('purchaseOverlay').addEventListener('click', e => {
 
 /* ── 교재 상세 모달 ── */
 let bdCurrentTitle = '';
+let bdHistory = [];
+let quizActiveFilter = null;
 
 function openBookDetail(title) {
+  const overlay = document.getElementById('bookDetailOverlay');
+  if (overlay.classList.contains('open') && bdCurrentTitle && bdCurrentTitle !== title) {
+    bdHistory.push(bdCurrentTitle);
+  }
   bdCurrentTitle = title;
+  document.getElementById('bdBackBtn').style.display = bdHistory.length ? 'inline-flex' : 'none';
   const b = BOOKS.find(bk => bk.title === title);
   if (!b) return;
 
@@ -2064,6 +2111,12 @@ function openBookDetail(title) {
 
 function closeBookDetail() {
   document.getElementById('bookDetailOverlay').classList.remove('open');
+  bdHistory = [];
+  bdCurrentTitle = '';
+}
+function goBackDetail() {
+  const prev = bdHistory.pop();
+  if (prev) openBookDetail(prev);
 }
 
 function toggleCompareFromDetail() {
@@ -2143,4 +2196,18 @@ function fmtGrade(g){return g.replace('초1~2','1~2학년').replace('초3~4','3~
 function fmtGrades(b){if(GRADE_DISPLAY[b.title])return[GRADE_DISPLAY[b.title]];if(b.grades.includes('초3~4')&&b.grades.includes('초5~6'))return['3~6학년'];return b.grades.map(fmtGrade);}
 /* ── Init ── */
 render();
-</script>
+
+/* ── Scroll to top ── */
+(function() {
+  const btn = document.createElement('button');
+  btn.id = 'scrollTopBtn';
+  btn.title = '맨 위로';
+  btn.innerHTML = '&#8679;';
+  document.body.appendChild(btn);
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();</script>
