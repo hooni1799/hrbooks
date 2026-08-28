@@ -772,32 +772,39 @@ a { text-decoration: none; color: inherit; }
 /* ── Scroll to top ── */
 #scrollTopBtn {
   position: fixed;
-  bottom: 28px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--primary);
+  bottom: 30px;
+  right: 28px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 23px;
+  background: var(--c-accent);
   color: #fff;
   border: none;
-  font-size: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(0,0,0,.22);
+  gap: 6px;
+  box-shadow: 0 4px 20px rgba(232,150,10,0.50), 0 1px 4px rgba(0,0,0,0.18);
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .25s, transform .25s;
+  transform: translateY(16px);
+  transition: opacity .25s, transform .25s, box-shadow .2s;
   pointer-events: none;
   z-index: 200;
+  white-space: nowrap;
 }
 #scrollTopBtn.visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
-#scrollTopBtn:hover { background: #1a56db; }
+#scrollTopBtn:hover {
+  box-shadow: 0 6px 28px rgba(232,150,10,0.65), 0 2px 6px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
+}
+#scrollTopBtn:active { transform: scale(0.96) translateY(0); }
 /* ── Theme toggle ── */
 .btn-theme {
   width: 36px; height: 36px;
@@ -2349,7 +2356,7 @@ function toggleTheme() {
   const btn = document.createElement('button');
   btn.id = 'scrollTopBtn';
   btn.title = '맨 위로';
-  btn.innerHTML = '&#8679;';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> 맨 위로';
   document.body.appendChild(btn);
   window.addEventListener('scroll', function() {
     btn.classList.toggle('visible', window.scrollY > 300);
