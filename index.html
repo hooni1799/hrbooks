@@ -255,6 +255,14 @@ a { text-decoration: none; color: inherit; }
 .cat-exam-badge { background: rgba(67,56,202,0.12); color: var(--c-cat-exam); }
 .cat-oa-badge { background: rgba(8,145,178,0.12); color: var(--c-cat-oa); }
 .cat-special-badge { background: rgba(124,58,237,0.12); color: var(--c-cat-special); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cat-exam-badge { background: rgba(129,140,248,0.18); color: #a5b4fc; }
+  :root:not([data-theme="light"]) .cat-oa-badge { background: rgba(34,211,238,0.15); color: #67e8f9; }
+  :root:not([data-theme="light"]) .cat-special-badge { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+}
+:root[data-theme="dark"] .cat-exam-badge { background: rgba(129,140,248,0.18); color: #a5b4fc; }
+:root[data-theme="dark"] .cat-oa-badge { background: rgba(34,211,238,0.15); color: #67e8f9; }
+:root[data-theme="dark"] .cat-special-badge { background: rgba(167,139,250,0.18); color: #c4b5fd; }
 .book-title {
   font-size: 12.5px; font-weight: 600; line-height: 1.4;
   color: var(--c-text);
