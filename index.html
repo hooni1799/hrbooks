@@ -239,11 +239,24 @@ a { text-decoration: none; color: inherit; }
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-size: 13px; font-weight: 700;
   opacity: 0; transition: opacity 0.15s;
-  z-index: 2;
+  z-index: 2; cursor: pointer;
 }
 .book-card:hover .compare-checkbox,
 .book-card.selected .compare-checkbox { opacity: 1; }
 .book-card.selected .compare-checkbox { background: var(--c-accent); border-color: var(--c-accent); }
+.compare-checkbox::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,20,35,0.88);
+  color: #fff; font-size: 11px; font-weight: 600;
+  white-space: nowrap; padding: 4px 8px;
+  border-radius: 5px; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+  z-index: 20;
+}
+.compare-checkbox:hover::after { opacity: 1; }
 .book-info {
   padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1;
 }
@@ -1550,7 +1563,7 @@ function render() {
     return `<div class="book-card${isSelected ? ' selected' : ''}" data-title="${b.title}" onclick="openBookDetail(this.dataset.title)">
       <div class="book-cover">
         ${coverHtml}
-        <div class="compare-checkbox" onclick="event.stopPropagation();toggleCompareByTitle(this.closest('.book-card').dataset.title)">${isSelected ? '✓' : '+'}</div>
+        <div class="compare-checkbox" data-tooltip="${isSelected ? '비교에서 제거' : '교재 비교 담기'}" onclick="event.stopPropagation();toggleCompareByTitle(this.closest('.book-card').dataset.title)">${isSelected ? '✓' : '+'}</div>
         <button class="${favorites.has(b.title) ? 'fav-btn fav-active' : 'fav-btn'}" onclick="event.stopPropagation();toggleFav(this.closest('.book-card').dataset.title)" title="즐겨찾기">${favorites.has(b.title) ? '♥' : '♡'}</button>
       </div>
       <div class="book-info">
