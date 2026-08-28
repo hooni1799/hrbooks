@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<meta charset="UTF-8">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>해람북스 교재 추천</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -741,16 +741,6 @@ a { text-decoration: none; color: inherit; }
 }
 .bd-compare-btn:hover { background: var(--c-primary); color: #fff; }
 .bd-compare-btn.bd-in-compare { background: var(--c-primary); color: #fff; }
-.bd-toc-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 0 16px; height: 38px; border-radius: 8px;
-  background: var(--c-bg); color: var(--c-text);
-  border: 1.5px solid var(--c-border);
-  font-size: 13px; font-weight: 600;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-  white-space: nowrap;
-}
-.bd-toc-btn:hover { border-color: var(--c-primary); color: var(--c-primary); background: rgba(40,85,197,0.06); }
 .bd-link-btn {
   padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
   background: var(--c-primary); color: #fff; text-decoration: none;
@@ -1326,8 +1316,7 @@ a { text-decoration: none; color: inherit; }
           </div>
           <div class="bd-actions">
             <button class="bd-compare-btn" id="bdCompareBtn" onclick="toggleCompareFromDetail()">+ 비교에 추가</button>
-            <a class="bd-toc-btn" id="bdTocBtn" href="#" target="_blank">📋 목차 보기</a>
-            <a class="bd-link-btn" id="bdLink" href="#" target="_blank">교재 상세 보기 →</a>
+            <a class="bd-link-btn" id="bdLink" href="#" target="_blank">교재 상세 보기</a>
           </div>
         </div>
       </div>
@@ -1576,7 +1565,7 @@ function render() {
           ${b.pubDate ? `<span class="book-pubdate">${b.pubDate} 출간</span>` : ''}
         </div>
       </div>
-      <a class="book-link" href="${b.purchaseUrl}" target="_blank" onclick="event.stopPropagation()">교재 상세 보기 →</a>
+      <a class="book-link" href="${b.purchaseUrl}" target="_blank" onclick="event.stopPropagation()">교재 상세 보기</a>
     </div>`;
   }).join('');
   // Attach actual book references for compare
@@ -1748,7 +1737,7 @@ function openCompare() {
         <div class="compare-feature-label">교재 특징</div>
         <div class="compare-feature">${featureVal}</div>
       </div>
-      <a class="compare-link" href="${b.purchaseUrl}" target="_blank">교재 상세 보기 →</a>
+      <a class="compare-link" href="${b.purchaseUrl}" target="_blank">교재 상세 보기</a>
     </div>`;
   }).join('');
   document.getElementById('compareOverlay').classList.add('open');
@@ -2206,14 +2195,8 @@ function openBookDetail(title) {
 
   // 교재 보기 링크
   const linkEl = document.getElementById('bdLink');
-  const tocEl = document.getElementById('bdTocBtn');
-  if (b.purchaseUrl) {
-    linkEl.href = b.purchaseUrl; linkEl.style.display = '';
-    tocEl.href = b.purchaseUrl; tocEl.style.display = '';
-  } else {
-    linkEl.style.display = 'none';
-    tocEl.style.display = 'none';
-  }
+  if (b.purchaseUrl) { linkEl.href = b.purchaseUrl; linkEl.style.display = ''; }
+  else { linkEl.style.display = 'none'; }
 
   // 유사 교재 (같은 카테고리 + 학년 겹침)
   const similar = getSimilarBooks(b);
